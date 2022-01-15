@@ -1,0 +1,212 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[2]:
+
+
+data = pd.read_csv("Downloads\BI Analyst - Assignment - Sheet1.csv")
+data.head()
+
+
+# In[3]:
+
+
+print(data.shape)
+print(data.info())
+print(data.describe())
+
+
+# In[4]:
+
+
+data['New_date'] =  data['date'].apply(lambda x : x.split(' ')[0])
+data['New_date'] = pd.to_datetime(data['New_date'],format = '%d-%m-%Y')
+data.New_date.head()
+
+
+# In[5]:
+
+
+data['day'] =data['New_date'].dt.day
+data.day.head()
+
+
+# In[6]:
+
+
+data.head()
+
+
+# In[7]:
+
+
+gmv =data.item_total.sum()
+transactions = data.shape[0]
+print("The total GMV of BigSpoon for march is ",gmv)
+print("Total no.of transactions in March are ",transactions)
+
+
+# In[8]:
+
+
+sum_orders = data.groupby('day').item_total.sum()
+No_of_orders = data.groupby('day').item_quantity.sum()
+
+
+# In[9]:
+
+
+sum_orders=pd.DataFrame(sum_orders)
+No_of_orders=pd.DataFrame(No_of_orders)
+
+
+# In[10]:
+
+
+day = {"Day":[0,1, 2, 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]}
+day = pd.DataFrame(day)
+
+
+# In[11]:
+
+
+AOV_df = pd.concat([sum_orders,No_of_orders,day],axis=1)
+AOV_df.head()
+
+
+# In[12]:
+
+
+AOV_df.drop(0,inplace=True)
+AOV_df.head()
+
+
+# In[13]:
+
+
+AOV_df[['AOV']] = (AOV_df['item_total']/AOV_df['item_quantity'])
+
+
+# In[14]:
+
+
+AOV_df[['AOV']] = np.round(AOV_df[['AOV']],2)
+
+
+# In[15]:
+
+
+AOV_df.head()
+
+
+# In[16]:
+
+
+overall_order_value = AOV_df.item_total.sum()
+overall_orders = AOV_df.item_quantity.sum()
+overall_AOV = np.round((overall_order_value/overall_orders),2)
+print('The total value of order is ',overall_order_value)
+print('The total Number of orders are ',overall_orders)
+print('The Overall AOV is ',overall_AOV)
+
+
+# In[17]:
+
+
+AOV_df.plot('Day','AOV',title ="Average value of orders",marker ="o",label ='AOV')
+
+
+# In[18]:
+
+
+sum_orders_outlet = data.groupby('outlet').item_total.sum()
+No_of_orders_outlet = data.groupby('outlet').item_quantity.sum()
+sum_orders_outlet=pd.DataFrame(sum_orders_outlet)
+No_of_orders_outlet=pd.DataFrame(No_of_orders_outlet)
+outlet_df = pd.concat([sum_orders_outlet,No_of_orders_outlet],axis=1)
+outlet_df.reset_index(inplace=True)
+outlet_df[['AOV']] = np.round(outlet_df['item_total']/outlet_df['item_quantity'],2)
+outlet_df['outlet'] = outlet_df['outlet'].apply(lambda x : x.split('-')[1])
+import matplotlib.pyplot as plt
+outlet_df=outlet_df.sort_values('AOV')
+plt.figure(figsize=(20,10))
+plt.bar(outlet_df['outlet'],outlet_df['AOV'],color ='skyblue',width = 0.4)
+plt.xlabel("BigSpoon Outlets")
+plt.ylabel("Average AOV")
+plt.title("Average AOV in all the outlets")
+plt.show()
+
+
+# In[22]:
+
+
+outlet_df=outlet_df.sort_values('item_quantity')
+outlet_df.head(10)
+
+
+# In[23]:
+
+
+sum_orders_brand = data.groupby('brand').item_total.sum()
+No_of_orders_brand = data.groupby('brand').item_quantity.sum()
+sum_orders_brand=pd.DataFrame(sum_orders_brand)
+No_of_orders_brand=pd.DataFrame(No_of_orders_brand)
+brand_df = pd.concat([sum_orders_brand,No_of_orders_brand],axis=1)
+brand_df.reset_index(inplace=True)
+brand_df[['AOV']] = np.round(brand_df['item_total']/brand_df['item_quantity'],2)
+
+import matplotlib.pyplot as plt
+brand_df=brand_df.sort_values('AOV')
+plt.figure(figsize=(10,5))
+plt.bar(brand_df['brand'],brand_df['AOV'],color ='skyblue',width = 0.4)
+plt.xlabel("BigSpoon Brands")
+plt.ylabel("Average AOV")
+plt.title("Average AOV in all the Brands")
+plt.show()
+
+
+# In[24]:
+
+
+brand_df.head()
+
+
+# In[29]:
+
+
+sum_orders_channel = data.groupby('channel').item_total.sum()
+No_of_orders_channel = data.groupby('channel').item_quantity.sum()
+sum_orders_channel=pd.DataFrame(sum_orders_channel)
+No_of_orders_channel=pd.DataFrame(No_of_orders_channel)
+channel_df = pd.concat([sum_orders_channel,No_of_orders_channel],axis=1)
+channel_df.reset_index(inplace=True)
+channel_df[['AOV']] = np.round(channel_df['item_total']/channel_df['item_quantity'],2)
+
+import matplotlib.pyplot as plt
+channel_df=channel_df.sort_values('AOV')
+plt.figure(figsize=(7,5))
+plt.bar(channel_df['channel'],channel_df['AOV'],color ='skyblue',width = 0.4)
+plt.xlabel("BigSpoon Channels")
+plt.ylabel("Average AOV")
+plt.title("Average AOV in all the Channels")
+plt.show()
+
+
+# In[30]:
+
+
+channel_df.head()
+
+
+# In[ ]:
+
+
+
+
